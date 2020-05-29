@@ -5,24 +5,33 @@ import (
 	"alshashiguchi/quiz_gem/graph/generated"
 	"log"
 	"net/http"
-	"os"
 
+	configurations "alshashiguchi/quiz_gem/core"
 	database "alshashiguchi/quiz_gem/db/mysql"
 
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
+	"github.com/joho/godotenv"
 )
 
 const defaultPort = "8080"
 
+func init() {
+	if err := godotenv.Load(); err != nil {
+		log.Println("No .env file found")
+	}
+}
+
 func main() {
-	port := os.Getenv("PORT")
+	config := configurations.New()
+
+	port := config.PortServer.Port
 	if port == "" {
 		port = defaultPort
 	}
 
-	database.InitDB()
-	database.Migrate()
+	database.InitDB(config)
+	database.Migrate(config)
 
 	srv := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &graph.Resolver{}}))
 

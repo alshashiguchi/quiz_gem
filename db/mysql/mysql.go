@@ -4,6 +4,8 @@ import (
 	"database/sql"
 	"log"
 
+	configurations "alshashiguchi/quiz_gem/core"
+
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/golang-migrate/migrate"
 	"github.com/golang-migrate/migrate/database/mysql"
@@ -13,8 +15,9 @@ import (
 var Db *sql.DB
 
 //InitDB - initializes the database
-func InitDB() {
-	db, err := sql.Open("mysql", "root:root@(172.17.0.2)/quiz_gem")
+func InitDB(config *configurations.Configurations) {
+
+	db, err := sql.Open(config.DataBase.Drive, config.DataBase.URL)
 	if err != nil {
 		log.Panic(err)
 	}
@@ -26,14 +29,15 @@ func InitDB() {
 }
 
 //Migrate - runs migrations
-func Migrate() {
+func Migrate(config *configurations.Configurations) {
+
 	if err := Db.Ping(); err != nil {
 		log.Fatal(err)
 	}
 	driver, _ := mysql.WithInstance(Db, &mysql.Config{})
 	m, _ := migrate.NewWithDatabaseInstance(
-		"file://db/migrations/mysql",
-		"mysql",
+		config.DataBase.PathMigrations,
+		config.DataBase.Drive,
 		driver,
 	)
 	if err := m.Up(); err != nil && err != migrate.ErrNoChange {
