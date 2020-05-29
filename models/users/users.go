@@ -17,6 +17,37 @@ type User struct {
 	Password  string           `json:"password,omitempty"`
 }
 
+//GetAll - Get all users permission ADMIN
+func GetAll() ([]model.User, error) {
+	stmt, err := database.Db.Prepare("SELECT ID, Username, Name, Email, Access, Situation FROM Users")
+
+	if err != nil {
+		return []model.User{}, err
+	}
+	defer stmt.Close()
+
+	rows, err := stmt.Query()
+
+	if err != nil {
+		return []model.User{}, err
+	}
+	defer rows.Close()
+
+	var users []model.User
+	for rows.Next() {
+		var user model.User
+		err := rows.Scan(&user.ID, &user.Username, &user.Name, &user.Email, &user.Access, &user.Situation)
+		if err != nil {
+			return []model.User{}, err
+		}
+		users = append(users, user)
+	}
+	if err = rows.Err(); err != nil {
+		return []model.User{}, err
+	}
+	return users, nil
+}
+
 //Create - create new user
 func (user *User) Create() (model.User, error) {
 	statement, err := database.Db.Prepare("INSERT INTO Users(Username, Name, Email, Access, Situation, Password) VALUES(?,?,?,?,?,?)")

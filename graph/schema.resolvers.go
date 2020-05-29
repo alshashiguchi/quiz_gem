@@ -43,10 +43,17 @@ func (r *mutationResolver) RefreshToken(ctx context.Context, input model.Refresh
 }
 
 func (r *queryResolver) Users(ctx context.Context) ([]*model.User, error) {
-	var users []*model.User
-	users = append(users, &model.User{Name: "Andre", Access: model.AccessAdmin, Situation: model.UserStatusActive})
+	var result []*model.User
 
-	return users, nil
+	dbUsers, err := users.GetAll()
+	if err != nil {
+		return nil, err
+	}
+
+	for _, user := range dbUsers {
+		result = append(result, &model.User{ID: user.ID, Username: user.Username, Name: user.Name, Email: user.Email, Access: user.Access, Situation: user.Situation})
+	}
+	return result, nil
 }
 
 func (r *queryResolver) User(ctx context.Context, id *int) (*model.User, error) {
