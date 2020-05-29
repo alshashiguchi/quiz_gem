@@ -3,8 +3,9 @@ package main
 import (
 	"alshashiguchi/quiz_gem/graph"
 	"alshashiguchi/quiz_gem/graph/generated"
-	"log"
 	"net/http"
+
+	log "github.com/sirupsen/logrus"
 
 	configurations "alshashiguchi/quiz_gem/core"
 	database "alshashiguchi/quiz_gem/db/mysql"
@@ -18,7 +19,7 @@ const defaultPort = "8080"
 
 func init() {
 	if err := godotenv.Load(); err != nil {
-		log.Println("No .env file found")
+		log.Fatal("No .env file found")
 	}
 }
 

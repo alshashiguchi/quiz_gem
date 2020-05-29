@@ -6,7 +6,8 @@ package graph
 import (
 	"alshashiguchi/quiz_gem/graph/generated"
 	"alshashiguchi/quiz_gem/graph/model"
-	"log"
+
+	log "github.com/sirupsen/logrus"
 
 	"alshashiguchi/quiz_gem/models/users"
 	"context"
@@ -14,6 +15,7 @@ import (
 )
 
 func (r *mutationResolver) CreateUser(ctx context.Context, input model.NewUser) (*model.User, error) {
+	log.Info("Start CreateUser")
 	var user users.User
 	var userModel model.User
 
@@ -29,8 +31,9 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input model.NewUser) 
 		return nil, err
 	}
 
-	log.Println("User Created")
+	log.Info("User Created", &userModel.ID)
 
+	log.Info("End CreateUser")
 	return &userModel, nil
 }
 
@@ -43,6 +46,7 @@ func (r *mutationResolver) RefreshToken(ctx context.Context, input model.Refresh
 }
 
 func (r *queryResolver) Users(ctx context.Context) ([]*model.User, error) {
+	log.Info("Start GetAll Users")
 	var result []*model.User
 
 	dbUsers, err := users.GetAll()
@@ -53,6 +57,7 @@ func (r *queryResolver) Users(ctx context.Context) ([]*model.User, error) {
 	for _, user := range dbUsers {
 		result = append(result, &model.User{ID: user.ID, Username: user.Username, Name: user.Name, Email: user.Email, Access: user.Access, Situation: user.Situation})
 	}
+	log.Info("End GetAll Users")
 	return result, nil
 }
 
