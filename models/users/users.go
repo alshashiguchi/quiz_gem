@@ -3,7 +3,7 @@ package users
 import (
 	database "alshashiguchi/quiz_gem/db/mysql"
 	"alshashiguchi/quiz_gem/graph/model"
-	"log"
+	"strconv"
 )
 
 //User - Struct User
@@ -18,29 +18,33 @@ type User struct {
 }
 
 //Create - create new user
-func (user *User) Create() (int64, error) {
+func (user *User) Create() (model.User, error) {
 	statement, err := database.Db.Prepare("INSERT INTO Users(Username, Name, Email, Access, Situation, Password) VALUES(?,?,?,?,?,?)")
 
 	if err != nil {
-		log.Fatal(err)
+		return model.User{}, err
 	}
 	// hashedPassword, err := HashPassword(user.Password)
 	result, err := statement.Exec(user.Username, user.Name, user.Email, user.Access, user.Situation, user.Password)
 	if err != nil {
-		log.Fatal(err)
+		return model.User{}, err
 	}
 
-	lastId, _ := result.LastInsertId()
+	id, err := result.LastInsertId()
+
+	if err != nil {
+		return model.User{}, err
+	}
 
 	// fmt.Println(reflect.TypeOf().Kind())
 
-	return lastId, nil
+	return user.convertToGraphModelUser(id), nil
 }
 
-//ConvertToGraphModelUser - convert graphql model user to user
-func (user *User) ConvertToGraphModelUser() model.User {
+func (user *User) convertToGraphModelUser(id int64) model.User {
 	var userModel model.User
 
+	userModel.ID = strconv.Itoa(int(id))
 	userModel.Name = user.Name
 	userModel.Username = user.Username
 	userModel.Email = user.Email

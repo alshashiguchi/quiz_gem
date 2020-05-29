@@ -7,7 +7,6 @@ import (
 	"alshashiguchi/quiz_gem/graph/generated"
 	"alshashiguchi/quiz_gem/graph/model"
 	"log"
-	"strconv"
 
 	"alshashiguchi/quiz_gem/models/users"
 	"context"
@@ -24,15 +23,13 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input model.NewUser) 
 	user.Access = input.Access
 	user.Situation = input.Situation
 
-	idCreated, err := user.Create()
-	log.Println("User Created")
+	userModel, err := user.Create()
 
 	if err != nil {
 		return nil, err
 	}
 
-	userModel = user.ConvertToGraphModelUser()
-	userModel.ID = strconv.Itoa(int(idCreated))
+	log.Println("User Created")
 
 	return &userModel, nil
 }
