@@ -1,0 +1,49 @@
+type User {
+  id: ID!
+  name: String!
+  email: String!
+  username: String!
+  access: Access!
+  situation: UserStatus!
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  BLOCKED
+}
+
+enum Access {
+  STUDENT
+  INSTRUCTOR  
+  ADMIN
+}
+
+type Query {
+  users: [User!]!
+  user(id: Int): User
+}
+
+input RefreshTokenInput{
+  token: String!
+}
+
+input NewUser {
+  name: String!
+  email: String!
+  username: String!
+  password: String!
+  access: Access!
+  situation: UserStatus!
+}
+
+input Login {
+  username: String!
+  password: String!
+}
+
+type Mutation {  
+  createUser(input: NewUser!): User!
+  login(input: Login!): String!  
+  refreshToken(input: RefreshTokenInput!): String!
+}
