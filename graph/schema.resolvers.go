@@ -6,12 +6,13 @@ package graph
 import (
 	"alshashiguchi/quiz_gem/graph/generated"
 	"alshashiguchi/quiz_gem/graph/model"
-
-	log "github.com/sirupsen/logrus"
-
 	"alshashiguchi/quiz_gem/models/users"
 	"context"
 	"fmt"
+
+	sec "alshashiguchi/quiz_gem/core/security"
+
+	log "github.com/sirupsen/logrus"
 )
 
 func (r *mutationResolver) CreateUser(ctx context.Context, input model.NewUser) (*model.User, error) {
@@ -24,6 +25,7 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input model.NewUser) 
 	user.Email = input.Email
 	user.Access = input.Access
 	user.Situation = input.Situation
+	user.Password = input.Password
 
 	userModel, err := user.Create()
 
@@ -31,14 +33,30 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input model.NewUser) 
 		return nil, err
 	}
 
-	log.Info("User Created", &userModel.ID)
+	log.Info("User Created ", userModel.ID)
 
 	log.Info("End CreateUser")
 	return &userModel, nil
 }
 
 func (r *mutationResolver) Login(ctx context.Context, input model.Login) (string, error) {
-	panic(fmt.Errorf("not implemented"))
+	var user users.User
+	user.Username = input.Username
+	user.Password = input.Password
+	correct := user.Authenticate()
+	if !correct {
+		return "", &users.WrongUsernameOrPasswordError{}
+	}
+	userAuth, err := users.GetUserByUsername(user.Username)
+	if err != nil {
+		return "", err
+	}
+
+	token, err := sec.GenerateToken(userAuth)
+	if err != nil {
+		return "", err
+	}
+	return token, nil
 }
 
 func (r *mutationResolver) RefreshToken(ctx context.Context, input model.RefreshTokenInput) (string, error) {

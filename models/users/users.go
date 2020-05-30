@@ -3,9 +3,11 @@ package users
 import (
 	database "alshashiguchi/quiz_gem/db/mysql"
 	"alshashiguchi/quiz_gem/graph/model"
+	"database/sql"
 	"strconv"
 
 	log "github.com/sirupsen/logrus"
+	"golang.org/x/crypto/bcrypt"
 )
 
 //User - Struct User
@@ -17,6 +19,61 @@ type User struct {
 	Access    model.Access     `json:"access,omitempty"`
 	Situation model.UserStatus `json:"situation,omitempty"`
 	Password  string           `json:"password,omitempty"`
+}
+
+//GetUserByUsername - Get user by username
+func GetUserByUsername(username string) (model.User, error) {
+	statement, err := database.Db.Prepare("select ID, Username, Name, Email, Access, Situation from Users WHERE Username = ?")
+	if err != nil {
+		logWarningUser("Database prepare", "Error get user by username", err)
+	}
+	row := statement.QueryRow(username)
+
+	var user model.User
+	err = row.Scan(&user.ID, &user.Username, &user.Name, &user.Email, &user.Access, &user.Situation)
+
+	if err != nil {
+		if err != sql.ErrNoRows {
+			logWarningUser("Error read rown", "Error get user by username", err)
+		}
+		return model.User{}, err
+	}
+
+	return user, nil
+}
+
+//Authenticate - Authenticate system
+func (user *User) Authenticate() bool {
+	statement, err := database.Db.Prepare("select Password from Users WHERE Username = ?")
+	if err != nil {
+		log.Fatal(err)
+	}
+	row := statement.QueryRow(user.Username)
+
+	var hashedPassword string
+	err = row.Scan(&hashedPassword)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			logWarningUser("Erro read rows Authenticate", "Error authenticate", err)
+			return false
+		} else {
+			log.Fatal(err)
+		}
+	}
+
+	return CheckPasswordHash(user.Password, hashedPassword)
+}
+
+//HashPassword hashes given password
+func HashPassword(password string) (string, error) {
+	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
+	return string(bytes), err
+}
+
+//CheckPasswordHash hash compares raw password with it's hashed values
+func CheckPasswordHash(password, hash string) bool {
+	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
+	return err == nil
 }
 
 //GetAll - Get all users permission ADMIN
@@ -62,8 +119,9 @@ func (user *User) Create() (model.User, error) {
 		logWarningUser("Database prepare", "Error Create User", err)
 		return model.User{}, err
 	}
-	// hashedPassword, err := HashPassword(user.Password)
-	result, err := statement.Exec(user.Username, user.Name, user.Email, user.Access, user.Situation, user.Password)
+
+	hashedPassword, err := HashPassword(user.Password)
+	result, err := statement.Exec(user.Username, user.Name, user.Email, user.Access, user.Situation, hashedPassword)
 	if err != nil {
 		logWarningUser("Fields create user", "Error Create User", err)
 		return model.User{}, err

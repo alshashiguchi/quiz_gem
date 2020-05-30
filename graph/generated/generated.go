@@ -269,6 +269,7 @@ enum Access {
   STUDENT
   INSTRUCTOR  
   ADMIN
+  NOACCESS
 }
 
 type Query {

@@ -41,17 +41,19 @@ const (
 	AccessStudent    Access = "STUDENT"
 	AccessInstructor Access = "INSTRUCTOR"
 	AccessAdmin      Access = "ADMIN"
+	AccessNoaccess   Access = "NOACCESS"
 )
 
 var AllAccess = []Access{
 	AccessStudent,
 	AccessInstructor,
 	AccessAdmin,
+	AccessNoaccess,
 }
 
 func (e Access) IsValid() bool {
 	switch e {
-	case AccessStudent, AccessInstructor, AccessAdmin:
+	case AccessStudent, AccessInstructor, AccessAdmin, AccessNoaccess:
 		return true
 	}
 	return false

@@ -14,10 +14,16 @@ type DataBaseConfig struct {
 	PathMigrations string
 }
 
-//Config - configurations
+//GetSecretKey - Config Secret key JWT
+type GetSecretKey struct {
+	Key string
+}
+
+//Configurations - configurations system
 type Configurations struct {
 	PortServer PortServerConfig
 	DataBase   DataBaseConfig
+	SecretKey  GetSecretKey
 }
 
 func New() *Configurations {
@@ -29,6 +35,9 @@ func New() *Configurations {
 			Drive:          getEnv("DRIVE_DATABASE", ""),
 			URL:            getEnv("URL_DATABASE", ""),
 			PathMigrations: getEnv("PATH_MIGRATION_DATABASE", ""),
+		},
+		SecretKey: GetSecretKey{
+			Key: getEnv("SECREAT_KEY", ""),
 		},
 	}
 }
