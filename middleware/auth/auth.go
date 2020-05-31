@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"alshashiguchi/quiz_gem/graph/model"
 	users "alshashiguchi/quiz_gem/models/users"
 	"context"
 	"net/http"
@@ -53,7 +54,20 @@ func Middleware() func(http.Handler) http.Handler {
 }
 
 // ForContext finds the user from the context. REQUIRES Middleware to have run.
-func ForContext(ctx context.Context) *users.User {
+func ForContext(ctx context.Context, access []model.Access) *users.User {
 	raw, _ := ctx.Value(userCtxKey).(*users.User)
+
+	if !contains(access, raw.Access) {
+		return nil
+	}
+
 	return raw
+}
+func contains(listAccess []model.Access, userAccess model.Access) bool {
+	for _, a := range listAccess {
+		if a == userAccess {
+			return true
+		}
+	}
+	return false
 }

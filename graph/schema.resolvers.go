@@ -70,7 +70,9 @@ func (r *mutationResolver) RefreshToken(ctx context.Context, input model.Refresh
 func (r *queryResolver) Users(ctx context.Context) ([]*model.User, error) {
 	log.Info("Start GetAll Users")
 
-	userCtx := auth.ForContext(ctx)
+	var access []model.Access
+	access = append(access, model.AccessInstructor)
+	userCtx := auth.ForContext(ctx, access)
 	if userCtx == nil {
 		return nil, fmt.Errorf("access denied")
 	}
