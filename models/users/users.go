@@ -23,7 +23,7 @@ type User struct {
 
 //GetUserByUsername - Get user by username
 func GetUserByUsername(username string) (model.User, error) {
-	statement, err := database.Db.Prepare("select ID, Username, Name, Email, Access, Situation from Users WHERE Username = ?")
+	statement, err := database.Db.Prepare("select ID, Username, Name, Email, Access, Situation from Users WHERE Username = ? AND Situation = 'ACTIVE'")
 	if err != nil {
 		logWarningUser("Database prepare", "Error get user by username", err)
 	}
@@ -44,7 +44,7 @@ func GetUserByUsername(username string) (model.User, error) {
 
 //Authenticate - Authenticate system
 func (user *User) Authenticate() bool {
-	statement, err := database.Db.Prepare("select Password from Users WHERE Username = ?")
+	statement, err := database.Db.Prepare("select Password from Users WHERE Username = ? AND Situation = 'ACTIVE'")
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -30,6 +30,7 @@ github.com/docker/go-units v0.4.0 h1:3uh0PgVws3nIA0Q+MwDC8yjEPf9zjRfZZWXZYDct3Tw
 github.com/docker/go-units v0.4.0/go.mod h1:fgPhTUdO+D/Jk86RDLlptpiXQzgHJF7gydDDbaIK4Dk=
 github.com/glyphack/go-graphql-hackernews v0.0.0-20200522081210-00d36dcf3663 h1:s+DCmVetgG2BRlADOAw7314Mz/tf/8V7Dmk+Mwu0M7c=
 github.com/glyphack/go-graphql-hackernews v0.0.0-20200522081210-00d36dcf3663/go.mod h1:Tzru3sbCrPerDYoW7yQNdUUrtpjgPLx55RNQBzXrN5c=
+github.com/go-chi/chi v3.3.2+incompatible h1:uQNcQN3NsV1j4ANsPh42P4ew4t6rnRbJb8frvpp31qQ=
 github.com/go-chi/chi v3.3.2+incompatible/go.mod h1:eB3wogJHnLi3x/kFX2A+IbTBlXxmMeXJVKy9tTv1XzQ=
 github.com/go-sql-driver/mysql v1.5.0 h1:ozyZYNQW3x3HtqT1jira07DN2PArx2v7/mN66gGcHOs=
 github.com/go-sql-driver/mysql v1.5.0/go.mod h1:DCzpHaOWr8IXmIStZouvnhqoel9Qv2LBy8hT2VhHyBg=

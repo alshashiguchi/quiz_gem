@@ -6,6 +6,7 @@ package graph
 import (
 	"alshashiguchi/quiz_gem/graph/generated"
 	"alshashiguchi/quiz_gem/graph/model"
+	"alshashiguchi/quiz_gem/middleware/auth"
 	"alshashiguchi/quiz_gem/models/users"
 	"context"
 	"fmt"
@@ -47,12 +48,7 @@ func (r *mutationResolver) Login(ctx context.Context, input model.Login) (string
 	if !correct {
 		return "", &users.WrongUsernameOrPasswordError{}
 	}
-	userAuth, err := users.GetUserByUsername(user.Username)
-	if err != nil {
-		return "", err
-	}
-
-	token, err := sec.GenerateToken(userAuth)
+	token, err := sec.GenerateToken(user.Username)
 	if err != nil {
 		return "", err
 	}
@@ -60,11 +56,25 @@ func (r *mutationResolver) Login(ctx context.Context, input model.Login) (string
 }
 
 func (r *mutationResolver) RefreshToken(ctx context.Context, input model.RefreshTokenInput) (string, error) {
-	panic(fmt.Errorf("not implemented"))
+	username, err := sec.ParseToken(input.Token)
+	if err != nil {
+		return "", fmt.Errorf("access denied")
+	}
+	token, err := sec.GenerateToken(username)
+	if err != nil {
+		return "", err
+	}
+	return token, nil
 }
 
 func (r *queryResolver) Users(ctx context.Context) ([]*model.User, error) {
 	log.Info("Start GetAll Users")
+
+	userCtx := auth.ForContext(ctx)
+	if userCtx == nil {
+		return nil, fmt.Errorf("access denied")
+	}
+
 	var result []*model.User
 
 	dbUsers, err := users.GetAll()

@@ -5,10 +5,12 @@ import (
 	"alshashiguchi/quiz_gem/graph/generated"
 	"net/http"
 
+	"github.com/go-chi/chi"
 	log "github.com/sirupsen/logrus"
 
 	configurations "alshashiguchi/quiz_gem/core"
 	database "alshashiguchi/quiz_gem/db/mysql"
+	auth "alshashiguchi/quiz_gem/middleware/auth"
 
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
@@ -31,14 +33,18 @@ func main() {
 		port = defaultPort
 	}
 
+	router := chi.NewRouter()
+
+	router.Use(auth.Middleware())
+
 	database.InitDB(config)
 	database.Migrate(config)
 
 	srv := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &graph.Resolver{}}))
 
-	http.Handle("/", playground.Handler("GraphQL playground", "/query"))
-	http.Handle("/query", srv)
+	router.Handle("/", playground.Handler("GraphQL playground", "/query"))
+	router.Handle("/query", srv)
 
 	log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
-	log.Fatal(http.ListenAndServe(":"+port, nil))
+	log.Fatal(http.ListenAndServe(":"+port, router))
 }
